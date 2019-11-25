@@ -6,15 +6,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.pkmmte.pkrss.Article;
+import com.pkmmte.pkrss.Callback;
 import com.pkmmte.pkrss.PkRSS;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends AppCompatActivity implements Callback {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
-    private List<Article> list;
+    private List<Article> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,12 +24,30 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
 
         recyclerView = findViewById(R.id.recyclerView);
-        RecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new RecyclerAdapter(list);
         recyclerView.setAdapter(adapter);
 
-        PkRSS.with(this.load("http://www.androidpro.com.br/feed/")skip.Cache().callback().async)
+        PkRSS.with(this).load("http://www.androidpro.com.br/feed/").skipCache().callback(this).async();
+    }
+
+
+    @Override
+    public void onPreload() {
+
+    }
+
+    @Override
+    public void onLoaded(List<Article> newArticles) {
+        list.clear();
+        list.addAll(newArticles);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onLoadFailed() {
 
     }
 }
+
